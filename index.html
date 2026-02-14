@@ -137,7 +137,13 @@
     .theme-btn:hover::after{ opacity: .92; }
 
     .theme-icon{
-      display:inline-block;
+      width: 20px;
+      height: 20px;
+      display: inline-grid;
+      place-items: center;
+      line-height: 1;
+      font-size: 17px;
+      font-weight: 600;
       transition: opacity .18s ease, transform .18s ease;
       will-change: opacity, transform;
     }
@@ -452,7 +458,7 @@
         <button class="btn" id="clearTop">Limpar</button>
         <button class="btn primary" id="pdfTop">Exportar PDF</button>
         <button class="btn theme-btn" id="themeBtn" aria-label="Alternar tema" data-tooltip="Modo Claro • Clique para alternar">
-          <span class="theme-icon">🖥️</span>
+          <span class="theme-icon" aria-hidden="true">◯</span>
         </button>
       </div>
     </div>
@@ -800,8 +806,8 @@
     }
 
     function themeMeta(mode){
-      if(mode === "dark") return { icon:"🌙", tip:"Modo Escuro" };
-      return { icon:"☀️", tip:"Modo Claro" };
+      if(mode === "dark") return { icon:"◐", tip:"Modo Escuro" };
+      return { icon:"◯", tip:"Modo Claro" };
     }
 
     function applyTheme(mode, animate = true){
