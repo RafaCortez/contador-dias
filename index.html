@@ -394,8 +394,8 @@
       font-weight: 700;
       min-height: 20px;
     }
-    .status-line.ok{ color: var(--good); }
-    .status-line.error{ color: var(--bad); }
+    .status-line.status-ok{ color: var(--good); }
+    .status-line.status-error{ color: var(--bad); }
 
     .detail-sep{
       height: 1px;
@@ -589,8 +589,8 @@
           <label for="inclusive">Contagem inclusiva (conta 1º e último dia)</label>
         </div>
         <div class="meta-actions">
-          <button class="swapbtn" id="swapMeta" title="Inverter datas" aria-label="Inverter datas">↔</button>
           <button class="btn" id="clearTop">Limpar</button>
+          <button class="swapbtn" id="swapMeta" title="Inverter datas" aria-label="Inverter datas">↔</button>
           <button class="btn primary" id="pdfTop">Exportar PDF</button>
         </div>
       </div>
@@ -709,7 +709,7 @@
       setError("");
 
       const statusEl = $("status");
-      statusEl.classList.remove("ok","error");
+      statusEl.classList.remove("status-ok","status-error");
 
       const swapBtn = $("swapMeta");
       swapBtn.classList.remove("attn","show");
@@ -742,7 +742,7 @@
         $("daysTotalLine").textContent = "—";
         $("totalNote").textContent = "—";
         statusEl.textContent = "× Erro de intervalo";
-        statusEl.classList.add("error");
+        statusEl.classList.add("status-error");
 
         setError("A data final está antes da inicial. Use ↔ para inverter.");
 
@@ -778,7 +778,7 @@
       $("weeksLine").textContent = `${w.weeks} semana(s) e ${w.days} dia(s)`;
 
       statusEl.textContent = "✓ Calculado";
-      statusEl.classList.add("ok");
+      statusEl.classList.add("status-ok");
     }
 
     // Swap premium com crossfade do texto (overlay)
@@ -879,7 +879,7 @@
       $("daysTotalLine").textContent = "—";
       $("totalNote").textContent = "Preencha as datas e clique em calcular.";
       const statusEl = $("status");
-      statusEl.classList.remove("ok","error");
+      statusEl.classList.remove("status-ok","status-error");
       statusEl.textContent = "—";
       $("swapMeta").classList.remove("attn", "show");
       $("segStart").classList.remove("bad");
