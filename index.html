@@ -201,12 +201,6 @@
       min-width: 220px;
       flex: 1 1 220px;
     }
-    .seg-head{
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 8px;
-    }
     .seg:hover{ background: rgba(15,23,42,.02); }
     .seg label{ font-size: 12px; color: var(--muted); }
     .seg input{
@@ -222,6 +216,7 @@
     .seg input[type="date"]{
       font-size: 15px;
       font-weight: 500;
+      color-scheme: light;
     }
     .seg input::placeholder{ color: #94a3b8; }
 
@@ -230,33 +225,6 @@
       box-shadow: inset 0 0 0 1px rgba(239,68,68,.35);
     }
     .seg.bad label{ color: var(--bad); }
-
-    .calendar-btn{
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-      display: inline-grid;
-      place-items: center;
-      font-size: 12px;
-      line-height: 1;
-    }
-    .calendar-btn svg{ width: 14px; height: 14px; }
-    .calendar-btn:hover{ color: var(--text); border-color:#cbd5e1; }
-
-    .native-date-picker{
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0.001;
-      border: 0;
-      padding: 0;
-      pointer-events: auto;
-      clip-path: inset(50%);
-    }
 
     .divider{
       width:1px;
@@ -511,6 +479,10 @@
     html.t-dark .appearance-option:hover{ background: rgba(255,255,255,.06); }
     html.t-dark .appearance-option.active{ background: rgba(255,255,255,.1); }
 
+    html.t-dark .seg input[type="date"]{
+      color-scheme: dark;
+    }
+
     html.t-dark .swapbtn.attn{
       background: rgba(47,47,47,.92);
       border-color: rgba(16,163,127,.45);
@@ -565,33 +537,15 @@
 
     <div class="searchbar" role="group" aria-label="Barra de datas">
       <div class="seg" id="segStart">
-        <div class="seg-head">
-          <label for="start">Data inicial</label>
-          <button class="calendar-btn" id="startCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data inicial no calendário">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M8 3.5V7M16 3.5V7M4 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-        <input id="start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
-        <input id="startPicker" class="native-date-picker" type="date" tabindex="-1" aria-hidden="true">
+        <label for="start">Data inicial</label>
+        <input id="start" type="date">
       </div>
 
       <div class="divider" aria-hidden="true"></div>
 
       <div class="seg" id="segEnd">
-        <div class="seg-head">
-          <label for="end">Data final</label>
-          <button class="calendar-btn" id="endCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data final no calendário">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/>
-              <path d="M8 3.5V7M16 3.5V7M4 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-          </button>
-        </div>
-        <input id="end" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
-        <input id="endPicker" class="native-date-picker" type="date" tabindex="-1" aria-hidden="true">
+        <label for="end">Data final</label>
+        <input id="end" type="date">
       </div>
 
       <div class="cta">
@@ -660,43 +614,15 @@
       return d;
     }
 
-    function isoToBR(iso){
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
-      const [y,m,d] = iso.split("-");
-      return `${d}/${m}/${y}`;
-    }
-
-    function brToISO(br){
-      if(!/^\d{2}\/\d{2}\/\d{4}$/.test(br)) return "";
-      const [d,m,y] = br.split("/");
-      return `${y}-${m}-${d}`;
-    }
-
-    function openPicker(id, targetId){
-      const picker = $(id);
-      if(!picker) return;
-
-      const target = $(targetId);
-      const isoFromText = brToISO(target?.value || "");
-      if(isoFromText) picker.value = isoFromText;
-
-      picker.focus({ preventScroll: true });
-      if(typeof picker.showPicker === "function"){
-        picker.showPicker();
-      }else{
-        picker.click();
+    function parseDateValue(value){
+      if(!value) return null;
+      if(/^\d{4}-\d{2}-\d{2}$/.test(value)){
+        const [yyyy, mm, dd] = value.split("-").map(Number);
+        const d = new Date(yyyy, mm-1, dd, 0,0,0,0);
+        if(d.getFullYear() !== yyyy || d.getMonth() !== (mm-1) || d.getDate() !== dd) return null;
+        return d;
       }
-    }
-
-    function bindCalendarPicker({buttonId, pickerId, targetId}){
-      const picker = $(pickerId);
-      const target = $(targetId);
-      $(buttonId).addEventListener("click", ()=> openPicker(pickerId, targetId));
-      picker.addEventListener("change", ()=>{
-        if(!picker.value) return;
-        target.value = isoToBR(picker.value);
-        calcular();
-      });
+      return parseBR(value);
     }
 
     // diferença pura em dias, baseada em UTC para evitar DST/horário
@@ -763,8 +689,8 @@
       segA.classList.remove("bad");
       segB.classList.remove("bad");
 
-      const d1 = parseBR($("start").value);
-      const d2 = parseBR($("end").value);
+      const d1 = parseDateValue($("start").value);
+      const d2 = parseDateValue($("end").value);
       const inc = $("inclusive").checked;
 
       if(!d1 || !d2){
@@ -774,7 +700,7 @@
         $("daysTotalLine").textContent = "—";
         $("totalNote").textContent = "Preencha as datas e clique em calcular.";
         $("status").textContent = "—";
-        if ($("start").value || $("end").value) setError("Datas inválidas. Use dd/mm/aaaa.");
+        if ($("start").value || $("end").value) setError("Datas inválidas.");
         return;
       }
 
@@ -915,8 +841,6 @@
       setError("");
       $("start").value = "";
       $("end").value = "";
-      $("startPicker").value = "";
-      $("endPicker").value = "";
       $("total").textContent = "—";
       $("detail").textContent = "—";
       $("weeksLine").textContent = "—";
@@ -938,13 +862,10 @@
     // Eventos inputs
     ["start","end"].forEach(id=>{
       const el = $(id);
-      el.addEventListener("input", ()=> { maskBRDate(el); });
       el.addEventListener("keydown", (ev)=> { if(ev.key === "Enter") calcular(); });
+      el.addEventListener("change", calcular);
       el.addEventListener("blur", calcular);
     });
-
-    bindCalendarPicker({ buttonId:"startCalendarBtn", pickerId:"startPicker", targetId:"start" });
-    bindCalendarPicker({ buttonId:"endCalendarBtn", pickerId:"endPicker", targetId:"end" });
 
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
     $("calc").addEventListener("click", calcular);
