@@ -106,52 +106,59 @@
       box-shadow: 0 10px 20px rgba(59,130,246,.18);
     }
 
-    /* Botão de tema com tooltip + crossfade */
-    .theme-btn{
+    /* Seletor de aparência (estilo ChatGPT) */
+    .appearance{
       position: relative;
-      width: 46px;
-      height: 46px;
-      border-radius: 999px;
-      display: inline-grid;
-      place-items: center;
-      font-size: 18px;
-      transition: transform .18s ease;
     }
-    .theme-btn:hover{ transform: rotate(10deg) scale(1.05); }
+    .appearance-trigger{
+      min-width: 156px;
+      justify-content: space-between;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .appearance-label{ color: var(--muted); }
+    .appearance-value{ color: var(--text); }
+    .appearance-caret{
+      width: 14px;
+      height: 14px;
+      opacity: .78;
+      transition: transform .16s ease;
+    }
+    .appearance.open .appearance-caret{ transform: rotate(180deg); }
 
-    .theme-btn::after{
-      content: attr(data-tooltip);
+    .appearance-menu{
       position: absolute;
-      bottom: -36px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--text);
-      color: var(--bg);
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      opacity: 0;
-      pointer-events: none;
-      white-space: nowrap;
-      transition: opacity .15s ease;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 210px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      box-shadow: 0 18px 36px rgba(15, 23, 42, .22);
+      padding: 6px;
+      display: none;
+      z-index: 40;
     }
-    .theme-btn:hover::after{ opacity: .92; }
-
-    .theme-icon{
-      width: 20px;
-      height: 20px;
-      display: inline-grid;
-      place-items: center;
-      line-height: 1;
-      font-size: 17px;
-      font-weight: 600;
-      transition: opacity .18s ease, transform .18s ease;
-      will-change: opacity, transform;
+    .appearance.open .appearance-menu{ display:block; }
+    .appearance-option{
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      border-radius: 10px;
+      padding: 9px 12px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      cursor:pointer;
+      text-align:left;
     }
-    .theme-btn.fading .theme-icon{
-      opacity:0;
-      transform: scale(.9);
-    }
+    .appearance-option:hover{ background: rgba(15,23,42,.06); }
+    .appearance-option .check{ opacity:0; }
+    .appearance-option.active{ background: rgba(15,23,42,.08); }
+    .appearance-option.active .check{ opacity:1; }
 
     .wrap{
       max-width: 1100px;
@@ -436,7 +443,8 @@
     html.t-dark .card,
     html.t-dark .btn,
     html.t-dark .swapbtn,
-    html.t-dark .pill{
+    html.t-dark .pill,
+    html.t-dark .appearance-menu{
       background: rgba(47,47,47,.92);
     }
 
@@ -449,9 +457,15 @@
     html.t-dark .topbar,
     html.t-dark .topbar .brand,
     html.t-dark .topbar .btn,
-    html.t-dark .topbar .theme-btn{
+    html.t-dark .appearance-label,
+    html.t-dark .appearance-value,
+    html.t-dark .appearance-option,
+    html.t-dark .appearance-option .check{
       color: var(--text);
     }
+
+    html.t-dark .appearance-option:hover{ background: rgba(255,255,255,.06); }
+    html.t-dark .appearance-option.active{ background: rgba(255,255,255,.1); }
 
     html.t-dark .swapbtn.attn{
       background: rgba(47,47,47,.92);
@@ -477,9 +491,26 @@
       <div class="nav-actions">
         <button class="btn" id="clearTop">Limpar</button>
         <button class="btn primary" id="pdfTop">Exportar PDF</button>
-        <button class="btn theme-btn" id="themeBtn" aria-label="Alternar tema" data-tooltip="Modo Claro • Clique para alternar">
-          <span class="theme-icon" aria-hidden="true">◯</span>
-        </button>
+        <div class="appearance" id="appearanceControl">
+          <button class="btn appearance-trigger" id="appearanceBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Alterar aparência">
+            <span class="appearance-label">Aparência</span>
+            <span class="appearance-value" id="appearanceValue">Sistema</span>
+            <svg class="appearance-caret" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="appearance-menu" id="appearanceMenu" role="menu" aria-label="Selecionar aparência">
+            <button class="appearance-option" data-mode="system" role="menuitemradio" aria-checked="false">
+              <span>Sistema</span><span class="check">✓</span>
+            </button>
+            <button class="appearance-option" data-mode="dark" role="menuitemradio" aria-checked="false">
+              <span>Escuro</span><span class="check">✓</span>
+            </button>
+            <button class="appearance-option" data-mode="light" role="menuitemradio" aria-checked="false">
+              <span>Claro</span><span class="check">✓</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -815,9 +846,20 @@
 
     updateModePill();
 
-    /* ===== Tema: light/dark (persistido) ===== */
+    /* ===== Aparência: system/dark/light (estilo seletor) ===== */
     const THEME_KEY = "cd_theme_pref";
-    const themeBtn = $("themeBtn");
+    const appearanceControl = $("appearanceControl");
+    const appearanceBtn = $("appearanceBtn");
+    const appearanceValue = $("appearanceValue");
+    const appearanceMenu = $("appearanceMenu");
+
+    function systemPrefersDark(){
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    function resolvedMode(mode){
+      return mode === "system" ? (systemPrefersDark() ? "dark" : "light") : mode;
+    }
 
     function setHtmlThemeClass(mode){
       const html = document.documentElement;
@@ -825,14 +867,21 @@
       html.classList.add(mode === "dark" ? "t-dark" : "t-light");
     }
 
-    function themeMeta(mode){
-      if(mode === "dark") return { icon:"◐", tip:"Modo Escuro" };
-      return { icon:"◯", tip:"Modo Claro" };
+    function updateAppearanceUI(mode){
+      const labels = { system: "Sistema", dark: "Escuro", light: "Claro" };
+      appearanceValue.textContent = labels[mode] || "Sistema";
+
+      appearanceMenu.querySelectorAll(".appearance-option").forEach((opt)=>{
+        const active = opt.dataset.mode === mode;
+        opt.classList.toggle("active", active);
+        opt.setAttribute("aria-checked", active ? "true" : "false");
+      });
     }
 
     function applyTheme(mode, animate = true){
-      const safeMode = mode === "dark" ? "dark" : "light";
-      setHtmlThemeClass(safeMode);
+      const safeMode = ["system", "dark", "light"].includes(mode) ? mode : "system";
+      setHtmlThemeClass(resolvedMode(safeMode));
+      updateAppearanceUI(safeMode);
 
       const glow = document.getElementById("themeGlow");
       if (glow && animate){
@@ -840,40 +889,44 @@
         clearTimeout(applyTheme._glowT);
         applyTheme._glowT = setTimeout(() => glow.classList.remove("pulse"), 260);
       }
-
-      const meta = themeMeta(safeMode);
-      const btn = $("themeBtn");
-      if(!btn) return;
-
-      const iconEl = btn.querySelector(".theme-icon");
-      btn.dataset.tooltip = meta.tip + " • Clique para alternar";
-      btn.dataset.mode = safeMode;
-
-      if(!animate){
-        iconEl.textContent = meta.icon;
-        return;
-      }
-
-      btn.classList.add("fading");
-      setTimeout(() => {
-        iconEl.textContent = meta.icon;
-        btn.classList.remove("fading");
-      }, 160);
     }
 
-    function nextMode(mode){
-      return mode === "dark" ? "light" : "dark";
+    function setMenuOpen(open){
+      appearanceControl.classList.toggle("open", open);
+      appearanceBtn.setAttribute("aria-expanded", open ? "true" : "false");
     }
 
     let currentMode = localStorage.getItem(THEME_KEY);
-    if(currentMode !== "dark" && currentMode !== "light") currentMode = "light";
+    if(!["system", "dark", "light"].includes(currentMode)) currentMode = "system";
     applyTheme(currentMode, false);
 
-    themeBtn.addEventListener("click", () => {
-      currentMode = nextMode(currentMode);
-      localStorage.setItem(THEME_KEY, currentMode);
-      applyTheme(currentMode, true);
+    appearanceBtn.addEventListener("click", () => {
+      setMenuOpen(!appearanceControl.classList.contains("open"));
     });
+
+    appearanceMenu.querySelectorAll(".appearance-option").forEach((opt)=>{
+      opt.addEventListener("click", () => {
+        currentMode = opt.dataset.mode;
+        localStorage.setItem(THEME_KEY, currentMode);
+        applyTheme(currentMode, true);
+        setMenuOpen(false);
+      });
+    });
+
+    document.addEventListener("click", (ev) => {
+      if(!appearanceControl.contains(ev.target)) setMenuOpen(false);
+    });
+
+    document.addEventListener("keydown", (ev) => {
+      if(ev.key === "Escape") setMenuOpen(false);
+    });
+
+    if(window.matchMedia){
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      mq.addEventListener?.("change", () => {
+        if(currentMode === "system") applyTheme("system", false);
+      });
+    }
   </script>
 </body>
 </html>
