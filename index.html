@@ -201,6 +201,12 @@
       min-width: 220px;
       flex: 1 1 220px;
     }
+    .seg-head{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 8px;
+    }
     .seg:hover{ background: rgba(15,23,42,.02); }
     .seg label{ font-size: 12px; color: var(--muted); }
     .seg input{
@@ -220,6 +226,29 @@
       box-shadow: inset 0 0 0 1px rgba(239,68,68,.35);
     }
     .seg.bad label{ color: var(--bad); }
+
+    .calendar-btn{
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .calendar-btn:hover{ color: var(--text); border-color:#cbd5e1; }
+
+    .native-date-picker{
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
 
     .divider{
       width:1px;
@@ -528,15 +557,23 @@
 
     <div class="searchbar" role="group" aria-label="Barra de datas">
       <div class="seg" id="segStart">
-        <label for="start">Data inicial</label>
+        <div class="seg-head">
+          <label for="start">Data inicial</label>
+          <button class="calendar-btn" id="startCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data inicial no calendário">📅</button>
+        </div>
         <input id="start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
+        <input id="startPicker" class="native-date-picker" type="date" tabindex="-1" aria-hidden="true">
       </div>
 
       <div class="divider" aria-hidden="true"></div>
 
       <div class="seg" id="segEnd">
-        <label for="end">Data final</label>
+        <div class="seg-head">
+          <label for="end">Data final</label>
+          <button class="calendar-btn" id="endCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data final no calendário">📅</button>
+        </div>
         <input id="end" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
+        <input id="endPicker" class="native-date-picker" type="date" tabindex="-1" aria-hidden="true">
       </div>
 
       <div class="cta">
@@ -603,6 +640,30 @@
       const d = new Date(yyyy, mm-1, dd, 0,0,0,0);
       if(d.getFullYear() !== yyyy || d.getMonth() !== (mm-1) || d.getDate() !== dd) return null;
       return d;
+    }
+
+    function isoToBR(iso){
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return "";
+      const [y,m,d] = iso.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    function openPicker(id){
+      const picker = $(id);
+      if(!picker) return;
+      if(typeof picker.showPicker === "function") picker.showPicker();
+      else picker.click();
+    }
+
+    function bindCalendarPicker({buttonId, pickerId, targetId}){
+      const picker = $(pickerId);
+      const target = $(targetId);
+      $(buttonId).addEventListener("click", ()=> openPicker(pickerId));
+      picker.addEventListener("change", ()=>{
+        if(!picker.value) return;
+        target.value = isoToBR(picker.value);
+        calcular();
+      });
     }
 
     // diferença pura em dias, baseada em UTC para evitar DST/horário
@@ -821,6 +882,8 @@
       setError("");
       $("start").value = "";
       $("end").value = "";
+      $("startPicker").value = "";
+      $("endPicker").value = "";
       $("total").textContent = "—";
       $("detail").textContent = "—";
       $("weeksLine").textContent = "—";
@@ -846,6 +909,9 @@
       el.addEventListener("keydown", (ev)=> { if(ev.key === "Enter") calcular(); });
       el.addEventListener("blur", calcular);
     });
+
+    bindCalendarPicker({ buttonId:"startCalendarBtn", pickerId:"startPicker", targetId:"start" });
+    bindCalendarPicker({ buttonId:"endCalendarBtn", pickerId:"endPicker", targetId:"end" });
 
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
     $("calc").addEventListener("click", calcular);
