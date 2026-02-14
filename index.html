@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="pt-BR" class="t-light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contador de Dias | SaaS</title>
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#dbe3ef;
+      --chip:#f8fafc;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+      --shadow2: 0 6px 18px rgba(15, 23, 42, .06);
+      --r: 18px;
+
+      --accent:#3b82f6;
+      --bad:#ef4444;
+      --good:#16a34a;
+
+      --bgGlow1: rgba(59,130,246,.10);
+      --bgGlow2: rgba(34,197,94,.08);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 600px at 15% -10%, var(--bgGlow1), transparent 55%),
+        radial-gradient(900px 600px at 90% 10%, var(--bgGlow2), transparent 55%),
+        var(--bg);
+      transition: background .3s ease, color .3s ease;
+    }
+
+    /* Glow na troca de tema */
+    #themeGlow{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 0;
+      background:
+        radial-gradient(900px 600px at 20% 0%, rgba(59,130,246,.20), transparent 60%),
+        radial-gradient(900px 600px at 85% 10%, rgba(34,197,94,.16), transparent 60%);
+      transition: opacity .25s ease;
+    }
+    #themeGlow.pulse{ opacity:1; }
+
+    .topbar, .wrap{ position:relative; z-index:1; }
+
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 750;
+      letter-spacing: .2px;
+    }
+    .dot{
+      width:10px; height:10px; border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(59,130,246,.12);
+    }
+    .nav-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .btn{
+      font: inherit;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, .05);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    }
+    .btn:hover{ border-color:#cbd5e1; transform: translateY(-1px); }
+    .btn.primary{
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(59,130,246,.18);
+    }
+
+    /* Botão de tema com tooltip + crossfade */
+    .theme-btn{
+      position: relative;
+      width: 46px;
+      height: 46px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      font-size: 18px;
+      transition: transform .18s ease;
+    }
+    .theme-btn:hover{ transform: rotate(10deg) scale(1.05); }
+
+    .theme-btn::after{
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: -36px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: var(--bg);
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: opacity .15s ease;
+    }
+    .theme-btn:hover::after{ opacity: .92; }
+
+    .theme-icon{
+      display:inline-block;
+      transition: opacity .18s ease, transform .18s ease;
+      will-change: opacity, transform;
+    }
+    .theme-btn.fading .theme-icon{
+      opacity:0;
+      transform: scale(.9);
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 18px 40px;
+    }
+
+    .hero{ margin: 10px 0 16px; }
+    .hero h1{
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: -0.02em;
+    }
+    .hero p{
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 760px;
+      line-height: 1.35;
+      font-size: 14px;
+    }
+
+    .searchbar{
+      background:#fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      padding: 8px;
+      display:flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .seg{
+      display:flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      min-width: 220px;
+      flex: 1 1 220px;
+    }
+    .seg:hover{ background: rgba(15,23,42,.02); }
+    .seg label{ font-size: 12px; color: var(--muted); }
+    .seg input{
+      border: none;
+      outline: none;
+      font: inherit;
+      padding: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+    .seg input::placeholder{ color: #94a3b8; }
+
+    .seg.bad{
+      background: rgba(239,68,68,.06);
+      box-shadow: inset 0 0 0 1px rgba(239,68,68,.35);
+    }
+    .seg.bad label{ color: var(--bad); }
+
+    .divider{
+      width:1px;
+      height: 42px;
+      background: var(--line);
+      align-self: stretch;
+      margin: 0 2px;
+    }
+
+    .cta{ padding: 8px 10px; display:flex; gap:8px; }
+
+    .iconbtn{
+      width: 46px; height: 46px;
+      border-radius: 999px;
+      border: none;
+      background: var(--accent);
+      color:#fff;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 10px 20px rgba(59,130,246,.20);
+    }
+
+    .swapbtn{
+      width: 46px; height: 46px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      display: inline-grid;
+      place-items: center;
+      font-size: 18px;
+      color: var(--text);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, .05);
+      transition: all .18s ease;
+      display:none; /* só aparece quando necessário */
+    }
+    .swapbtn:hover{ border-color:#cbd5e1; background: rgba(15,23,42,.02); }
+
+    .swapbtn.show{ animation: swapEnter .25s ease forwards; }
+    .swapbtn.attn{
+      border-color: rgba(59,130,246,.35);
+      background: rgba(59,130,246,.06);
+      animation: swapPulse .6s ease;
+    }
+    @keyframes swapEnter{
+      from{ opacity:0; transform: translateY(6px) scale(.95); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+    @keyframes swapPulse{
+      0%{ box-shadow: 0 0 0 0 rgba(59,130,246,.35); }
+      70%{ box-shadow: 0 0 0 8px rgba(59,130,246,0); }
+      100%{ box-shadow: 0 0 0 0 rgba(59,130,246,0); }
+    }
+
+    .meta{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background:#fff;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, .05);
+    }
+    .toggle input{ transform: scale(1.1); }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      background: rgba(15,23,42,.03);
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--text);
+      width: fit-content;
+    }
+
+    .grid{
+      margin-top: 18px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .divider{ display:none; }
+      .seg{ min-width: 100%; }
+      .searchbar{ border-radius: 20px; }
+    }
+
+    .card{
+      border: 1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow2);
+      padding: 18px;
+      background: #fff;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .card:hover{ transform: translateY(-1px); box-shadow: 0 10px 30px rgba(15, 23, 42, .10); }
+
+    .card-total{
+      background: linear-gradient(180deg, rgba(59,130,246,.08), rgba(255,255,255,1) 60%);
+    }
+    .card-detail{
+      background: linear-gradient(180deg, rgba(34,197,94,.08), rgba(255,255,255,1) 60%);
+    }
+
+    .card h2{ margin: 0 0 10px; font-size: 16px; letter-spacing: -0.01em; }
+
+    .kpi{ display:flex; flex-direction: column; gap: 10px; }
+    .big{
+      font-size: 56px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .sub{ color: var(--muted); font-size: 14px; line-height: 1.35; }
+    .kv{ display:flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+    .kv strong{ color: var(--text); font-weight: 650; }
+
+    .error{
+      margin-top: 10px;
+      color: var(--bad);
+      font-size: 14px;
+      display:none;
+      opacity:0;
+      transition: opacity .2s ease;
+    }
+    .error.show{
+      display:block;
+      opacity:1;
+    }
+    .ok{ color: var(--good); font-weight: 600; }
+
+    /* Swap premium: texto cruza */
+    .swap-float{
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      border-radius: 999px;
+      padding: 0 8px;
+      display:flex;
+      align-items:center;
+      background: rgba(255,255,255,.95);
+      border: 1px solid rgba(59,130,246,.25);
+      box-shadow: 0 12px 30px rgba(15,23,42,.12);
+      backdrop-filter: blur(8px);
+      transition: transform .28s ease, opacity .28s ease;
+      opacity: 1;
+    }
+    .swap-float.fade{ opacity:.2; }
+    .swap-float.mode-inc{
+      border-color: rgba(34,197,94,.35);
+      box-shadow: 0 12px 30px rgba(34,197,94,.15);
+    }
+
+    .seg.swap-left{ animation: swapLeft .28s ease; }
+    .seg.swap-right{ animation: swapRight .28s ease; }
+    @keyframes swapLeft{
+      0%{ transform: translateX(0); }
+      45%{ transform: translateX(-10px); }
+      100%{ transform: translateX(0); }
+    }
+    @keyframes swapRight{
+      0%{ transform: translateX(0); }
+      45%{ transform: translateX(10px); }
+      100%{ transform: translateX(0); }
+    }
+    .seg.bounce{ animation: swapBounce .22s ease; }
+    @keyframes swapBounce{
+      0%{ transform: scale(1); }
+      40%{ transform: scale(1.03); }
+      100%{ transform: scale(1); }
+    }
+
+    /* THEMES (classes no <html>) */
+    html.t-light{
+      --bg:#ffffff; --text:#0f172a; --muted:#64748b; --line:#dbe3ef; --chip:#f8fafc;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+      --shadow2: 0 6px 18px rgba(15, 23, 42, .06);
+      --accent:#3b82f6; --bad:#ef4444; --good:#16a34a;
+      --bgGlow1: rgba(59,130,246,.10);
+      --bgGlow2: rgba(34,197,94,.08);
+    }
+    html.t-dark{
+      --bg:#0b1220; --text:#f1f5f9; --muted:#94a3b8; --line:#1e293b; --chip:#111827;
+      --shadow: 0 14px 40px rgba(0,0,0,.45);
+      --shadow2: 0 8px 24px rgba(0,0,0,.35);
+      --accent:#3b82f6; --bad:#ef4444; --good:#22c55e;
+      --bgGlow1: rgba(59,130,246,.16);
+      --bgGlow2: rgba(34,197,94,.12);
+    }
+    html.t-midnight{
+      --bg:#050814; --text:#e6edf6; --muted:#8ea0b7; --line:#101a2d; --chip:#070b18;
+      --shadow: 0 18px 60px rgba(0,0,0,.60);
+      --shadow2: 0 10px 28px rgba(0,0,0,.45);
+      --accent:#60a5fa; --bad:#fb7185; --good:#34d399;
+      --bgGlow1: rgba(96,165,250,.16);
+      --bgGlow2: rgba(52,211,153,.10);
+    }
+
+    html.t-dark .topbar,
+    html.t-midnight .topbar{
+      background: rgba(15,23,42,.85);
+    }
+    html.t-dark .searchbar,
+    html.t-dark .toggle,
+    html.t-dark .card,
+    html.t-dark .btn,
+    html.t-dark .swapbtn,
+    html.t-dark .pill{
+      background: rgba(17,24,39,.92);
+    }
+    html.t-midnight .searchbar,
+    html.t-midnight .toggle,
+    html.t-midnight .card,
+    html.t-midnight .btn,
+    html.t-midnight .swapbtn,
+    html.t-midnight .pill{
+      background: rgba(7,11,24,.92);
+    }
+
+    @media print{
+      .topbar, .searchbar, .meta, .nav-actions { display:none !important; }
+      .wrap{ padding:0; }
+      .card{ box-shadow:none; }
+      body{ background:#fff; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="themeGlow" aria-hidden="true"></div>
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="dot"></span><span>Contador</span></div>
+      <div class="nav-actions">
+        <button class="btn" id="clearTop">Limpar</button>
+        <button class="btn primary" id="pdfTop">Exportar PDF</button>
+        <button class="btn theme-btn" id="themeBtn" aria-label="Alternar tema" data-tooltip="Seguindo o Sistema • Clique para alternar">
+          <span class="theme-icon">🖥️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Contador de dias</h1>
+      <p>Compare datas com <strong>calendário real</strong> (anos/meses/dias), veja o total em dias corridos e a quebra em semanas.</p>
+    </div>
+
+    <div class="searchbar" role="group" aria-label="Barra de datas">
+      <div class="seg" id="segStart">
+        <label for="start">Data inicial</label>
+        <input id="start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
+      </div>
+
+      <div class="divider" aria-hidden="true"></div>
+
+      <div class="seg" id="segEnd">
+        <label for="end">Data final</label>
+        <input id="end" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
+      </div>
+
+      <div class="cta">
+        <button class="swapbtn" id="swapInline" title="Inverter datas" aria-label="Inverter datas">↔</button>
+
+        <button class="iconbtn" id="calc" title="Calcular" aria-label="Calcular">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" stroke="white" stroke-width="2"/>
+            <path d="M16.5 16.5 21 21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div class="toggle" title="Exclusivo: diferença pura | Inclusivo: conta 1º e último dia">
+        <input id="inclusive" type="checkbox">
+        <label for="inclusive">Contagem inclusiva (conta 1º e último dia)</label>
+      </div>
+
+      <div class="pill" id="modePill">Modo: Exclusivo</div>
+    </div>
+
+    <div class="grid">
+      <div class="card card-total">
+        <h2>Total</h2>
+        <div class="kpi">
+          <div class="big" id="total">—</div>
+          <div class="sub" id="totalNote">Preencha as datas e clique em calcular.</div>
+          <div class="error" id="erro"></div>
+        </div>
+      </div>
+
+      <div class="card card-detail">
+        <h2>Detalhamento</h2>
+        <div class="kpi">
+          <div class="sub"><span class="ok" id="status">—</span></div>
+          <div class="kv"><strong>Calendário:</strong> <span class="sub" id="detail">—</span></div>
+          <div class="kv"><strong>Dias corridos (total):</strong> <span class="sub" id="daysTotalLine">—</span></div>
+          <div class="kv"><strong>Semanas:</strong> <span class="sub" id="weeksLine">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function maskBRDate(input){
+      let v = input.value.replace(/\D/g, "").slice(0, 8);
+      if (v.length >= 5) v = v.replace(/^(\d{2})(\d{2})(\d{1,4}).*/, "$1/$2/$3");
+      else if (v.length >= 3) v = v.replace(/^(\d{2})(\d{1,2}).*/, "$1/$2");
+      input.value = v;
+    }
+
+    function parseBR(dataStr){
+      if(!/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return null;
+      const [dd, mm, yyyy] = dataStr.split("/").map(Number);
+      const d = new Date(yyyy, mm-1, dd, 0,0,0,0);
+      if(d.getFullYear() !== yyyy || d.getMonth() !== (mm-1) || d.getDate() !== dd) return null;
+      return d;
+    }
+
+    // diferença pura em dias, baseada em UTC para evitar DST/horário
+    function diffTotalDiasExclusivo(d1, d2){
+      const msPorDia = 86400000;
+      const utc1 = Date.UTC(d1.getFullYear(), d1.getMonth(), d1.getDate());
+      const utc2 = Date.UTC(d2.getFullYear(), d2.getMonth(), d2.getDate());
+      return Math.floor((utc2 - utc1) / msPorDia);
+    }
+
+    function addMonthsClamp(date, months){
+      const y = date.getFullYear();
+      const m = date.getMonth();
+      const d = date.getDate();
+      const target = new Date(y, m + months, 1);
+      const lastDay = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+      target.setDate(Math.min(d, lastDay));
+      return target;
+    }
+
+    // decomposição calendário: anos, meses, dias (sem “média”; usa calendário real)
+    function diffCalendario(d1, d2){
+      let years = d2.getFullYear() - d1.getFullYear();
+      let temp = addMonthsClamp(new Date(d1), years * 12);
+      if (temp > d2) { years--; temp = addMonthsClamp(new Date(d1), years * 12); }
+
+      let months = (d2.getFullYear() - temp.getFullYear()) * 12 + (d2.getMonth() - temp.getMonth());
+      let temp2 = addMonthsClamp(temp, months);
+      if (temp2 > d2) { months--; temp2 = addMonthsClamp(temp, months); }
+
+      const days = diffTotalDiasExclusivo(temp2, d2);
+      return { years, months, days };
+    }
+
+    function weeksFromTotal(totalDays){
+      return { weeks: Math.floor(totalDays / 7), days: totalDays % 7 };
+    }
+
+    function setError(msg){
+      const el = $("erro");
+      if(!msg){
+        el.classList.remove("show");
+        setTimeout(()=>{ el.style.display="none"; },200);
+        return;
+      }
+      el.textContent = msg;
+      el.style.display="block";
+      requestAnimationFrame(()=> el.classList.add("show"));
+    }
+
+    function updateModePill(){
+      const inc = $("inclusive").checked;
+      $("modePill").textContent = inc ? "Modo: Inclusivo" : "Modo: Exclusivo";
+    }
+
+    function calcular(){
+      setError("");
+
+      const swapBtn = $("swapInline");
+      swapBtn.style.display = "none";
+      swapBtn.classList.remove("attn","show");
+
+      const segA = $("segStart");
+      const segB = $("segEnd");
+      segA.classList.remove("bad");
+      segB.classList.remove("bad");
+
+      const d1 = parseBR($("start").value);
+      const d2 = parseBR($("end").value);
+      const inc = $("inclusive").checked;
+
+      if(!d1 || !d2){
+        $("total").textContent = "—";
+        $("detail").textContent = "—";
+        $("weeksLine").textContent = "—";
+        $("daysTotalLine").textContent = "—";
+        $("totalNote").textContent = "Preencha as datas e clique em calcular.";
+        $("status").textContent = "—";
+        if ($("start").value || $("end").value) setError("Datas inválidas. Use dd/mm/aaaa.");
+        return;
+      }
+
+      const diffExcl = diffTotalDiasExclusivo(d1, d2);
+      if(diffExcl < 0){
+        $("total").textContent = "—";
+        $("detail").textContent = "—";
+        $("weeksLine").textContent = "—";
+        $("daysTotalLine").textContent = "—";
+        $("totalNote").textContent = "—";
+        $("status").textContent = "Erro de intervalo";
+
+        setError("A data final está antes da inicial. Use ↔ para inverter.");
+
+        segA.classList.add("bad");
+        segB.classList.add("bad");
+
+        swapBtn.style.display = "inline-grid";
+        requestAnimationFrame(()=> {
+          swapBtn.classList.add("show");
+          swapBtn.classList.add("attn");
+        });
+
+        return;
+      }
+
+      const total = inc ? (diffExcl + 1) : diffExcl;
+      $("total").textContent = total;
+
+      $("totalNote").textContent = inc
+        ? "Modo inclusivo (conta o dia inicial e o final)."
+        : "Modo exclusivo (diferença pura entre datas).";
+
+      // Para detalhamento inclusivo, tratamos o “fim” como o dia seguinte (exclusivo)
+      const d2ForDetail = inc
+        ? new Date(d2.getFullYear(), d2.getMonth(), d2.getDate() + 1)
+        : d2;
+
+      const cal = diffCalendario(d1, d2ForDetail);
+      $("detail").textContent = `${cal.years} ano(s), ${cal.months} mes(es) e ${cal.days} dia(s)`;
+
+      $("daysTotalLine").textContent = total;
+
+      const w = weeksFromTotal(total);
+      $("weeksLine").textContent = `${w.weeks} semana(s) e ${w.days} dia(s)`;
+
+      $("status").textContent = "Calculado";
+    }
+
+    // Swap premium com crossfade do texto (overlay)
+    function swap(){
+      const segA = $("segStart");
+      const segB = $("segEnd");
+      const inputA = $("start");
+      const inputB = $("end");
+      const inc = $("inclusive").checked;
+
+      if (swap._busy) return;
+      swap._busy = true;
+
+      segA.classList.remove("swap-left","swap-right","bounce");
+      segB.classList.remove("swap-left","swap-right","bounce");
+      void segA.offsetWidth;
+
+      const rectA = inputA.getBoundingClientRect();
+      const rectB = inputB.getBoundingClientRect();
+
+      const floatA = document.createElement("div");
+      floatA.className = "swap-float";
+      floatA.textContent = inputA.value || "—";
+
+      const floatB = document.createElement("div");
+      floatB.className = "swap-float";
+      floatB.textContent = inputB.value || "—";
+
+      if(inc){
+        floatA.classList.add("mode-inc");
+        floatB.classList.add("mode-inc");
+      }
+
+      const place = (el, r) => {
+        el.style.left = `${r.left}px`;
+        el.style.top = `${r.top}px`;
+        el.style.width = `${r.width}px`;
+        el.style.height = `${r.height}px`;
+        el.style.fontSize = "15px";
+        el.style.paddingLeft = "6px";
+      };
+
+      place(floatA, rectA);
+      place(floatB, rectB);
+
+      document.body.appendChild(floatA);
+      document.body.appendChild(floatB);
+
+      const prevA = inputA.style.color;
+      const prevB = inputB.style.color;
+
+      inputA.style.color = "transparent";
+      inputB.style.color = "transparent";
+
+      segA.classList.add("swap-left");
+      segB.classList.add("swap-right");
+
+      requestAnimationFrame(() => {
+        floatA.style.transform = `translate(${rectB.left - rectA.left}px, ${rectB.top - rectA.top}px)`;
+        floatB.style.transform = `translate(${rectA.left - rectB.left}px, ${rectA.top - rectB.top}px)`;
+        floatA.classList.add("fade");
+        floatB.classList.add("fade");
+      });
+
+      setTimeout(() => {
+        const a = inputA.value;
+        inputA.value = inputB.value;
+        inputB.value = a;
+        calcular();
+      }, 140);
+
+      setTimeout(() => {
+        floatA.remove();
+        floatB.remove();
+
+        inputA.style.color = prevA;
+        inputB.style.color = prevB;
+
+        segA.classList.remove("swap-left");
+        segB.classList.remove("swap-right");
+
+        segB.classList.add("bounce");
+        inputB.focus();
+
+        setTimeout(()=> segB.classList.remove("bounce"), 220);
+
+        swap._busy = false;
+      }, 320);
+    }
+
+    function clearAll(){
+      setError("");
+      $("start").value = "";
+      $("end").value = "";
+      $("total").textContent = "—";
+      $("detail").textContent = "—";
+      $("weeksLine").textContent = "—";
+      $("daysTotalLine").textContent = "—";
+      $("totalNote").textContent = "Preencha as datas e clique em calcular.";
+      $("status").textContent = "—";
+      $("swapInline").style.display = "none";
+      $("segStart").classList.remove("bad");
+      $("segEnd").classList.remove("bad");
+      updateModePill();
+    }
+
+    function exportPDF(){
+      calcular();
+      if($("erro").textContent) return;
+      window.print();
+    }
+
+    // Eventos inputs
+    ["start","end"].forEach(id=>{
+      const el = $(id);
+      el.addEventListener("input", ()=> { maskBRDate(el); });
+      el.addEventListener("keydown", (ev)=> { if(ev.key === "Enter") calcular(); });
+      el.addEventListener("blur", calcular);
+    });
+
+    $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
+    $("calc").addEventListener("click", calcular);
+    $("swapInline").addEventListener("click", swap);
+    $("clearTop").addEventListener("click", clearAll);
+    $("pdfTop").addEventListener("click", exportPDF);
+
+    updateModePill();
+
+    /* ===== Tema: system/dark/midnight/light (persistido) ===== */
+    const THEME_KEY = "cd_theme_pref";
+    const themeBtn = $("themeBtn");
+
+    function systemPrefersDark(){
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    function setHtmlThemeClass(mode){
+      const html = document.documentElement;
+      html.classList.remove("t-light","t-dark","t-midnight");
+      if(mode === "light") html.classList.add("t-light");
+      else if(mode === "dark") html.classList.add("t-dark");
+      else if(mode === "midnight") html.classList.add("t-midnight");
+      else html.classList.add(systemPrefersDark() ? "t-dark" : "t-light");
+    }
+
+    function themeMeta(mode){
+      if(mode === "light") return { icon:"☀️", tip:"Modo Claro" };
+      if(mode === "dark") return { icon:"🌙", tip:"Modo Escuro" };
+      if(mode === "midnight") return { icon:"🟦", tip:"Modo Midnight" };
+      return { icon:"🖥️", tip:"Seguindo o Sistema" };
+    }
+
+    function applyTheme(mode, animate = true){
+      setHtmlThemeClass(mode);
+
+      const glow = document.getElementById("themeGlow");
+      if (glow && animate){
+        glow.classList.add("pulse");
+        clearTimeout(applyTheme._glowT);
+        applyTheme._glowT = setTimeout(() => glow.classList.remove("pulse"), 260);
+      }
+
+      const meta = themeMeta(mode);
+      const btn = $("themeBtn");
+      if(!btn) return;
+
+      const iconEl = btn.querySelector(".theme-icon");
+      btn.dataset.tooltip = meta.tip + " • Clique para alternar";
+      btn.dataset.mode = mode;
+
+      if(!animate){
+        iconEl.textContent = meta.icon;
+        return;
+      }
+
+      btn.classList.add("fading");
+      setTimeout(() => {
+        iconEl.textContent = meta.icon;
+        btn.classList.remove("fading");
+      }, 160);
+    }
+
+    function nextMode(mode){
+      if(mode === "system") return "dark";
+      if(mode === "dark") return "midnight";
+      if(mode === "midnight") return "light";
+      return "system";
+    }
+
+    let currentMode = localStorage.getItem(THEME_KEY) || "system";
+    applyTheme(currentMode, false);
+
+    if(window.matchMedia){
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      mq.addEventListener?.("change", () => {
+        if(currentMode === "system") applyTheme("system", false);
+      });
+    }
+
+    themeBtn.addEventListener("click", () => {
+      currentMode = nextMode(currentMode);
+      localStorage.setItem(THEME_KEY, currentMode);
+      applyTheme(currentMode, true);
+    });
+  </script>
+</body>
+</html>
