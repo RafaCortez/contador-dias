@@ -386,7 +386,32 @@
       display:block;
       opacity:1;
     }
-    .ok{ color: var(--good); font-weight: 600; }
+    .status-line{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size: 14px;
+      font-weight: 700;
+      min-height: 20px;
+    }
+    .status-line.ok{ color: var(--good); }
+    .status-line.error{ color: var(--bad); }
+
+    .detail-sep{
+      height: 1px;
+      border: none;
+      margin: 4px 0 10px;
+      background: var(--line);
+    }
+
+    .detail-list{
+      margin: 0;
+      padding-left: 18px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .detail-list li{ color: var(--text); }
 
     /* Swap premium: texto cruza */
     .swap-float{
@@ -503,7 +528,7 @@
 
   <div class="topbar">
     <div class="topbar-inner">
-      <div class="brand"><span class="dot"></span><span>Contador</span></div>
+      <div class="brand"><span class="dot"></span><span>Contador de dias</span></div>
       <div class="nav-actions">
         <div class="appearance" id="appearanceControl">
           <button class="btn appearance-trigger" id="appearanceBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Alterar aparência">
@@ -531,8 +556,7 @@
 
   <div class="wrap">
     <div class="hero">
-      <h1>Contador de dias</h1>
-      <p>Compare datas com <strong>calendário real</strong> (anos/meses/dias), veja o total em dias corridos e a quebra em semanas.</p>
+      <p>Insira abaixo as datas, e compare datas com <strong>calendário real</strong> (anos/meses/dias), veja o total em dias corridos e a quebra em semanas.</p>
     </div>
 
     <div class="searchbar" role="group" aria-label="Barra de datas">
@@ -585,12 +609,15 @@
       </div>
 
       <div class="card card-detail">
+        <div class="status-line" id="status">—</div>
+        <hr class="detail-sep" aria-hidden="true">
         <h2>Detalhamento</h2>
         <div class="kpi">
-          <div class="sub"><span class="ok" id="status">—</span></div>
-          <div class="kv"><strong>Calendário:</strong> <span class="sub" id="detail">—</span></div>
-          <div class="kv"><strong>Semanas:</strong> <span class="sub" id="weeksLine">—</span></div>
-          <div class="kv"><strong>Dias corridos (total):</strong> <span class="sub" id="daysTotalLine">—</span></div>
+          <ul class="detail-list">
+            <li><strong>Calendário:</strong> <span class="sub" id="detail">—</span></li>
+            <li><strong>Semanas:</strong> <span class="sub" id="weeksLine">—</span></li>
+            <li><strong>Dias corridos (total):</strong> <span class="sub" id="daysTotalLine">—</span></li>
+          </ul>
         </div>
       </div>
     </div>
@@ -681,6 +708,9 @@
     function calcular(){
       setError("");
 
+      const statusEl = $("status");
+      statusEl.classList.remove("ok","error");
+
       const swapBtn = $("swapMeta");
       swapBtn.classList.remove("attn","show");
 
@@ -699,7 +729,7 @@
         $("weeksLine").textContent = "—";
         $("daysTotalLine").textContent = "—";
         $("totalNote").textContent = "Preencha as datas e clique em calcular.";
-        $("status").textContent = "—";
+        statusEl.textContent = "—";
         if ($("start").value || $("end").value) setError("Datas inválidas.");
         return;
       }
@@ -711,7 +741,8 @@
         $("weeksLine").textContent = "—";
         $("daysTotalLine").textContent = "—";
         $("totalNote").textContent = "—";
-        $("status").textContent = "Erro de intervalo";
+        statusEl.textContent = "× Erro de intervalo";
+        statusEl.classList.add("error");
 
         setError("A data final está antes da inicial. Use ↔ para inverter.");
 
@@ -746,7 +777,8 @@
       const w = weeksFromTotal(total);
       $("weeksLine").textContent = `${w.weeks} semana(s) e ${w.days} dia(s)`;
 
-      $("status").textContent = "Calculado";
+      statusEl.textContent = "✓ Calculado";
+      statusEl.classList.add("ok");
     }
 
     // Swap premium com crossfade do texto (overlay)
@@ -846,7 +878,9 @@
       $("weeksLine").textContent = "—";
       $("daysTotalLine").textContent = "—";
       $("totalNote").textContent = "Preencha as datas e clique em calcular.";
-      $("status").textContent = "—";
+      const statusEl = $("status");
+      statusEl.classList.remove("ok","error");
+      statusEl.textContent = "—";
       $("swapMeta").classList.remove("attn", "show");
       $("segStart").classList.remove("bad");
       $("segEnd").classList.remove("bad");
