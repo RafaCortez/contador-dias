@@ -219,6 +219,10 @@
       font-size: 15px;
       letter-spacing: -0.01em;
     }
+    .seg input[type="date"]{
+      font-size: 15px;
+      font-weight: 500;
+    }
     .seg input::placeholder{ color: #94a3b8; }
 
     .seg.bad{
@@ -237,17 +241,21 @@
       cursor: pointer;
       display: inline-grid;
       place-items: center;
-      font-size: 14px;
+      font-size: 12px;
       line-height: 1;
     }
+    .calendar-btn svg{ width: 14px; height: 14px; }
     .calendar-btn:hover{ color: var(--text); border-color:#cbd5e1; }
 
     .native-date-picker{
       position: absolute;
-      width: 0;
-      height: 0;
-      opacity: 0;
-      pointer-events: none;
+      width: 1px;
+      height: 1px;
+      opacity: 0.001;
+      border: 0;
+      padding: 0;
+      pointer-events: auto;
+      clip-path: inset(50%);
     }
 
     .divider{
@@ -559,7 +567,12 @@
       <div class="seg" id="segStart">
         <div class="seg-head">
           <label for="start">Data inicial</label>
-          <button class="calendar-btn" id="startCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data inicial no calendário">📅</button>
+          <button class="calendar-btn" id="startCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data inicial no calendário">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 3.5V7M16 3.5V7M4 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
         <input id="start" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
         <input id="startPicker" class="native-date-picker" type="date" tabindex="-1" aria-hidden="true">
@@ -570,7 +583,12 @@
       <div class="seg" id="segEnd">
         <div class="seg-head">
           <label for="end">Data final</label>
-          <button class="calendar-btn" id="endCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data final no calendário">📅</button>
+          <button class="calendar-btn" id="endCalendarBtn" type="button" title="Selecionar no calendário" aria-label="Selecionar data final no calendário">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/>
+              <path d="M8 3.5V7M16 3.5V7M4 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
         <input id="end" type="text" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10">
         <input id="endPicker" class="native-date-picker" type="date" tabindex="-1" aria-hidden="true">
@@ -648,17 +666,32 @@
       return `${d}/${m}/${y}`;
     }
 
-    function openPicker(id){
+    function brToISO(br){
+      if(!/^\d{2}\/\d{2}\/\d{4}$/.test(br)) return "";
+      const [d,m,y] = br.split("/");
+      return `${y}-${m}-${d}`;
+    }
+
+    function openPicker(id, targetId){
       const picker = $(id);
       if(!picker) return;
-      if(typeof picker.showPicker === "function") picker.showPicker();
-      else picker.click();
+
+      const target = $(targetId);
+      const isoFromText = brToISO(target?.value || "");
+      if(isoFromText) picker.value = isoFromText;
+
+      picker.focus({ preventScroll: true });
+      if(typeof picker.showPicker === "function"){
+        picker.showPicker();
+      }else{
+        picker.click();
+      }
     }
 
     function bindCalendarPicker({buttonId, pickerId, targetId}){
       const picker = $(pickerId);
       const target = $(targetId);
-      $(buttonId).addEventListener("click", ()=> openPicker(pickerId));
+      $(buttonId).addEventListener("click", ()=> openPicker(pickerId, targetId));
       picker.addEventListener("change", ()=>{
         if(!picker.value) return;
         target.value = isoToBR(picker.value);
