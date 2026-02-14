@@ -293,6 +293,13 @@
       flex-wrap:wrap;
     }
 
+    .meta-actions{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
     .toggle{
       display:flex;
       align-items:center;
@@ -489,8 +496,6 @@
     <div class="topbar-inner">
       <div class="brand"><span class="dot"></span><span>Contador</span></div>
       <div class="nav-actions">
-        <button class="btn" id="clearTop">Limpar</button>
-        <button class="btn primary" id="pdfTop">Exportar PDF</button>
         <div class="appearance" id="appearanceControl">
           <button class="btn appearance-trigger" id="appearanceBtn" aria-haspopup="menu" aria-expanded="false" aria-label="Alterar aparência">
             <span class="appearance-label">Aparência</span>
@@ -550,7 +555,11 @@
           <input id="inclusive" type="checkbox">
           <label for="inclusive">Contagem inclusiva (conta 1º e último dia)</label>
         </div>
-        <button class="swapbtn" id="swapMeta" title="Inverter datas" aria-label="Inverter datas">↔</button>
+        <div class="meta-actions">
+          <button class="swapbtn" id="swapMeta" title="Inverter datas" aria-label="Inverter datas">↔</button>
+          <button class="btn" id="clearTop">Limpar</button>
+          <button class="btn primary" id="pdfTop">Exportar PDF</button>
+        </div>
       </div>
 
       <div class="pill" id="modePill">Modo: Exclusivo</div>
