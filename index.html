@@ -923,15 +923,20 @@
     // Eventos inputs
     ["start","end"].forEach(id=>{
       const el = $(id);
-      el.addEventListener("keydown", (ev)=> { if(ev.key === "Enter") calcular(); });
-      el.addEventListener("change", calcular);
-      el.addEventListener("blur", calcular);
+      el.addEventListener("keydown", (ev)=> {
+        if(ev.key === "Enter"){
+          triggerResultCardsFx();
+          calcular();
+        }
+      });
+      el.addEventListener("change", ()=>{ triggerResultCardsFx(); calcular(); });
+      el.addEventListener("blur", ()=>{ if(el.value) { triggerResultCardsFx(); calcular(); } });
     });
 
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
     $("calc").addEventListener("click", ()=>{ triggerResultCardsFx(); calcular(); });
-    $("swapMeta").addEventListener("click", swap);
-    $("clearTop").addEventListener("click", clearAll);
+    $("swapMeta").addEventListener("click", ()=>{ triggerResultCardsFx(); swap(); });
+    $("clearTop").addEventListener("click", ()=>{ triggerResultCardsFx(); clearAll(); });
     $("pdfTop").addEventListener("click", exportPDF);
 
     updateModePill();
