@@ -435,16 +435,16 @@
       box-shadow: 0 12px 30px rgba(34,197,94,.15);
     }
 
-    .seg.swap-left{ animation: swapLeft .28s ease; }
-    .seg.swap-right{ animation: swapRight .28s ease; }
+    .seg.swap-left{ animation: swapLeft .34s ease; }
+    .seg.swap-right{ animation: swapRight .34s ease; }
     @keyframes swapLeft{
       0%{ transform: translateX(0); }
-      45%{ transform: translateX(-10px); }
+      45%{ transform: translateX(16px); }
       100%{ transform: translateX(0); }
     }
     @keyframes swapRight{
       0%{ transform: translateX(0); }
-      45%{ transform: translateX(10px); }
+      45%{ transform: translateX(-16px); }
       100%{ transform: translateX(0); }
     }
     .seg.bounce{ animation: swapBounce .22s ease; }
@@ -652,6 +652,14 @@
       return parseBR(value);
     }
 
+    function formatDateForDisplay(value){
+      if(/^\d{4}-\d{2}-\d{2}$/.test(value)){
+        const [y,m,d] = value.split("-");
+        return `${d}/${m}/${y}`;
+      }
+      return value;
+    }
+
     // diferença pura em dias, baseada em UTC para evitar DST/horário
     function diffTotalDiasExclusivo(d1, d2){
       const msPorDia = 86400000;
@@ -801,11 +809,11 @@
 
       const floatA = document.createElement("div");
       floatA.className = "swap-float";
-      floatA.textContent = inputA.value || "—";
+      floatA.textContent = formatDateForDisplay(inputA.value) || "—";
 
       const floatB = document.createElement("div");
       floatB.className = "swap-float";
-      floatB.textContent = inputB.value || "—";
+      floatB.textContent = formatDateForDisplay(inputB.value) || "—";
 
       if(inc){
         floatA.classList.add("mode-inc");
