@@ -346,11 +346,7 @@
       color: var(--muted);
     }
     .abnb-tab.active{ background:#fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-    .abnb-months{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
+    .abnb-months{ display:block; }
     .abnb-head{
       display:flex;
       align-items:center;
@@ -503,7 +499,6 @@
       .seg{ min-width: 100%; }
       .searchbar{ border-radius: 20px; }
       .meta{ justify-content:flex-start; }
-      .abnb-months{ grid-template-columns: 1fr; }
     }
 
     .card{
@@ -845,12 +840,8 @@
       </div>
       <div class="abnb-months">
         <div>
-          <div class="abnb-head"><button class="abnb-nav" id="abnbPrev" type="button">‹</button><span id="abnbTitleA"></span><span style="width:32px"></span></div>
+          <div class="abnb-head"><button class="abnb-nav" id="abnbPrev" type="button">‹</button><span id="abnbTitleA"></span><button class="abnb-nav" id="abnbNext" type="button">›</button></div>
           <div class="abnb-grid" id="abnbGridA"></div>
-        </div>
-        <div>
-          <div class="abnb-head"><span style="width:32px"></span><span id="abnbTitleB"></span><button class="abnb-nav" id="abnbNext" type="button">›</button></div>
-          <div class="abnb-grid" id="abnbGridB"></div>
         </div>
       </div>
     </div>
@@ -968,9 +959,7 @@
 
     function renderAbnbCalendar(){
       const a = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth(), 1);
-      const b = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()+1, 1);
       renderMonth("abnbGridA", "abnbTitleA", a);
-      renderMonth("abnbGridB", "abnbTitleB", b);
     }
 
     // diferença pura em dias, baseada em UTC para evitar DST/horário
