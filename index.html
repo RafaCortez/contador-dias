@@ -318,12 +318,15 @@
     }
     .abnb-overlay.open{ display:flex; }
     .abnb-panel{
-      width: min(900px, 96vw);
+      width: min(620px, 96vw);
+      aspect-ratio: 1 / 1;
       background: #fff;
       border: 1px solid var(--line);
       border-radius: 22px;
       box-shadow: 0 30px 70px rgba(15,23,42,.22);
       padding: 16px;
+      display:flex;
+      flex-direction: column;
     }
     .abnb-tabs{
       display:flex;
@@ -355,13 +358,18 @@
       font-weight: 650;
     }
     .abnb-nav{
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 999px;
       border: 1px solid var(--line);
       background: #fff;
       cursor:pointer;
+      font-size: 18px;
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(15,23,42,.08);
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
     }
+    .abnb-nav:hover{ transform: translateY(-1px); box-shadow: 0 6px 14px rgba(15,23,42,.12); background: rgba(15,23,42,.03); }
     .abnb-grid{
       display:grid;
       grid-template-columns: repeat(7, 1fr);
@@ -380,6 +388,27 @@
     .abnb-day:hover{ border-color: var(--line); }
     .abnb-day.sel{ background: var(--text); color: var(--bg); }
     .abnb-day.muted{ color: #c3c9d4; cursor: default; }
+
+    .seg.fx-field{
+      animation: fieldPulse .28s ease;
+    }
+    @keyframes fieldPulse{
+      0%{ transform: scale(1); box-shadow: inset 0 0 0 0 rgba(59,130,246,.0); }
+      45%{ transform: scale(1.01); box-shadow: inset 0 0 0 1px rgba(59,130,246,.35); }
+      100%{ transform: scale(1); box-shadow: inset 0 0 0 0 rgba(59,130,246,.0); }
+    }
+
+    .btn.fx-btn,
+    .swapbtn.fx-btn,
+    .iconbtn.fx-btn,
+    .calendar-trigger.fx-btn{
+      animation: btnTap .22s ease;
+    }
+    @keyframes btnTap{
+      0%{ transform: scale(1); }
+      50%{ transform: scale(.96); }
+      100%{ transform: scale(1); }
+    }
 
     .divider{
       width:1px;
@@ -947,11 +976,14 @@
         if(selected && dt.toDateString() === selected.toDateString()) btn.classList.add("sel");
         btn.textContent = String(day);
         btn.addEventListener("click", ()=>{
+          const selectedField = abnb.openFor;
           const target = $(abnb.openFor);
           target.value = formatBR(dt);
+          triggerFieldFx([selectedField]);
           triggerResultCardsFx();
           calcular();
-          closeAbnbCalendar();
+          if(selectedField === "start") openAbnbCalendar("end");
+          else closeAbnbCalendar();
         });
         grid.appendChild(btn);
       }
@@ -1022,6 +1054,26 @@
         card.classList.remove("result-flash");
         void card.offsetWidth;
         card.classList.add("result-flash");
+      });
+    }
+
+    function triggerFieldFx(ids = []){
+      ids.forEach((id)=>{
+        const seg = id === "start" ? $("segStart") : id === "end" ? $("segEnd") : null;
+        if(!seg) return;
+        seg.classList.remove("fx-field");
+        void seg.offsetWidth;
+        seg.classList.add("fx-field");
+      });
+    }
+
+    function triggerBtnFx(ids = []){
+      ids.forEach((id)=>{
+        const btn = $(id);
+        if(!btn) return;
+        btn.classList.remove("fx-btn");
+        void btn.offsetWidth;
+        btn.classList.add("fx-btn");
       });
     }
 
@@ -1225,20 +1277,21 @@
       el.addEventListener("input", ()=> maskBRDate(el));
       el.addEventListener("keydown", (ev)=> {
         if(ev.key === "Enter"){
+          triggerFieldFx([id]);
           triggerResultCardsFx();
           calcular();
         }
       });
-      el.addEventListener("change", ()=>{ triggerResultCardsFx(); calcular(); });
-      el.addEventListener("blur", ()=>{ if(el.value) { triggerResultCardsFx(); calcular(); } });
+      el.addEventListener("change", ()=>{ triggerFieldFx([id]); triggerResultCardsFx(); calcular(); });
+      el.addEventListener("blur", ()=>{ if(el.value) { triggerFieldFx([id]); triggerResultCardsFx(); calcular(); } });
       el.addEventListener("focus", ()=> openAbnbCalendar(id));
       el.addEventListener("click", ()=> openAbnbCalendar(id));
     });
 
-    $("openStartCal").addEventListener("click", ()=> openAbnbCalendar("start"));
-    $("openEndCal").addEventListener("click", ()=> openAbnbCalendar("end"));
-    $("abnbPrev").addEventListener("click", ()=>{ abnb.monthBase = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()-1, 1); renderAbnbCalendar(); });
-    $("abnbNext").addEventListener("click", ()=>{ abnb.monthBase = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()+1, 1); renderAbnbCalendar(); });
+    $("openStartCal").addEventListener("click", ()=>{ triggerBtnFx(["openStartCal"]); openAbnbCalendar("start"); });
+    $("openEndCal").addEventListener("click", ()=>{ triggerBtnFx(["openEndCal"]); openAbnbCalendar("end"); });
+    $("abnbPrev").addEventListener("click", ()=>{ triggerBtnFx(["abnbPrev"]); abnb.monthBase = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()-1, 1); renderAbnbCalendar(); });
+    $("abnbNext").addEventListener("click", ()=>{ triggerBtnFx(["abnbNext"]); abnb.monthBase = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()+1, 1); renderAbnbCalendar(); });
     $("abnbOverlay").addEventListener("click", (ev)=>{
       if(ev.target.id === "abnbOverlay") closeAbnbCalendar();
     });
@@ -1246,9 +1299,9 @@
       if(ev.key === "Escape") closeAbnbCalendar();
     });
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
-    $("calc").addEventListener("click", ()=>{ triggerResultCardsFx(); calcular(); });
-    $("swapMeta").addEventListener("click", ()=>{ triggerResultCardsFx(); swap(); });
-    $("clearTop").addEventListener("click", ()=>{ triggerResultCardsFx(); clearAll(); });
+    $("calc").addEventListener("click", ()=>{ triggerBtnFx(["calc"]); triggerResultCardsFx(); calcular(); });
+    $("swapMeta").addEventListener("click", ()=>{ triggerBtnFx(["swapMeta"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); swap(); });
+    $("clearTop").addEventListener("click", ()=>{ triggerBtnFx(["clearTop"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); clearAll(); });
     $("pdfTop").addEventListener("click", exportPDF);
 
     updateModePill();
