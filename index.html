@@ -384,21 +384,6 @@
     .abnb-day:hover{ border-color: var(--line); }
     .abnb-day.sel{ background: var(--text); color: var(--bg); }
     .abnb-day.muted{ color: #c3c9d4; cursor: default; }
-    .abnb-quick{
-      margin-top: 14px;
-      display:flex;
-      gap:8px;
-      flex-wrap: wrap;
-    }
-    .abnb-quick button{
-      border:1px solid var(--line);
-      background: #fff;
-      border-radius: 999px;
-      padding: 8px 12px;
-      font: inherit;
-      cursor: pointer;
-      color: var(--text);
-    }
 
     .divider{
       width:1px;
@@ -704,8 +689,7 @@
       color: var(--text);
     }
     html.t-dark .abnb-panel,
-    html.t-dark .abnb-nav,
-    html.t-dark .abnb-quick button{ background: #2f2f2f; border-color: var(--line); }
+    html.t-dark .abnb-nav{ background: #2f2f2f; border-color: var(--line); }
     html.t-dark .abnb-pill{ background: #202020; }
     html.t-dark .abnb-tab.active{ background:#3a3a3a; color: var(--text); }
     html.t-dark .abnb-day.sel{ background: #f3f4f6; color: #111; }
@@ -856,9 +840,7 @@
     <div class="abnb-panel" role="dialog" aria-modal="true" aria-label="Selecionar data">
       <div class="abnb-tabs">
         <div class="abnb-pill">
-          <button class="abnb-tab active" type="button">Datas</button>
-          <button class="abnb-tab" type="button" disabled>Meses</button>
-          <button class="abnb-tab" type="button" disabled>Flexível</button>
+          <button class="abnb-tab active" id="abnbTabLabel" type="button">Data inicial</button>
         </div>
       </div>
       <div class="abnb-months">
@@ -870,14 +852,6 @@
           <div class="abnb-head"><span style="width:32px"></span><span id="abnbTitleB"></span><button class="abnb-nav" id="abnbNext" type="button">›</button></div>
           <div class="abnb-grid" id="abnbGridB"></div>
         </div>
-      </div>
-      <div class="abnb-quick">
-        <button type="button" data-plus="0">Datas exatas</button>
-        <button type="button" data-plus="1">± 1 dia</button>
-        <button type="button" data-plus="2">± 2 dias</button>
-        <button type="button" data-plus="3">± 3 dias</button>
-        <button type="button" data-plus="7">± 7 dias</button>
-        <button type="button" data-plus="14">± 14 dias</button>
       </div>
     </div>
   </div>
@@ -935,6 +909,7 @@
 
     function openAbnbCalendar(targetId){
       abnb.openFor = targetId;
+      $("abnbTabLabel").textContent = targetId === "start" ? "Data inicial" : "Data final";
       const parsed = parseDateValue($(targetId).value);
       const base = parsed || new Date();
       abnb.monthBase = new Date(base.getFullYear(), base.getMonth(), 1);
@@ -1281,19 +1256,6 @@
     document.addEventListener("keydown", (ev)=>{
       if(ev.key === "Escape") closeAbnbCalendar();
     });
-    document.querySelectorAll(".abnb-quick [data-plus]").forEach((btn)=>{
-      btn.addEventListener("click", ()=>{
-        if(!abnb.openFor) return;
-        const plus = Number(btn.dataset.plus || 0);
-        const base = new Date();
-        base.setDate(base.getDate() + plus);
-        $(abnb.openFor).value = formatBR(base);
-        triggerResultCardsFx();
-        calcular();
-        closeAbnbCalendar();
-      });
-    });
-
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
     $("calc").addEventListener("click", ()=>{ triggerResultCardsFx(); calcular(); });
     $("swapMeta").addEventListener("click", ()=>{ triggerResultCardsFx(); swap(); });
