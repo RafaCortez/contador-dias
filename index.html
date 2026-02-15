@@ -52,6 +52,64 @@
 
     .topbar, .wrap{ position:relative; z-index:1; }
 
+    .sidebar{
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      background: #171717;
+      color: #ececec;
+      border-right: 1px solid #2b2b2b;
+      z-index: 20;
+      display:flex;
+      flex-direction: column;
+      padding: 14px 10px;
+      overflow-y: auto;
+    }
+    .sidebar-brand{
+      font-weight: 700;
+      padding: 8px 10px 14px;
+      color: #f3f4f6;
+      border-bottom: 1px solid #2b2b2b;
+      margin-bottom: 10px;
+    }
+    .sidebar-section{
+      color: #a3a3a3;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      padding: 10px 10px 6px;
+    }
+    .sidebar-list{
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display:flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sidebar-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: #e5e7eb;
+      padding: 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .sidebar-item:hover{ background: #222; }
+    .sidebar-item.active{
+      background: #2a2a2a;
+      color: #fff;
+    }
+
+    .main-area{
+      margin-left: 260px;
+      min-height: 100vh;
+    }
+
     .topbar{
       position: sticky;
       top: 0;
@@ -337,6 +395,8 @@
       gap: 14px;
     }
     @media (max-width: 900px){
+      .sidebar{ position: static; width: 100%; height: auto; border-right: none; border-bottom: 1px solid #2b2b2b; }
+      .main-area{ margin-left: 0; }
       .grid{ grid-template-columns: 1fr; }
       .divider{ display:none; }
       .seg{ min-width: 100%; }
@@ -528,6 +588,7 @@
     }
 
     @media print{
+      .sidebar{ display:none !important; }
       .topbar, .searchbar, .meta, .nav-actions { display:none !important; }
       .wrap{ padding:0; }
       .card{ box-shadow:none; }
@@ -538,6 +599,27 @@
 
 <body>
   <div id="themeGlow" aria-hidden="true"></div>
+
+  <aside class="sidebar" aria-label="Serviços">
+    <div class="sidebar-brand">Serviços</div>
+
+    <div class="sidebar-section">Principais</div>
+    <ul class="sidebar-list">
+      <li><a class="sidebar-item active" href="#"><span>🗓️</span><span>Contador de dias</span></a></li>
+      <li><a class="sidebar-item" href="#"><span>📆</span><span>Calculadora de prazos</span></a></li>
+      <li><a class="sidebar-item" href="#"><span>🧮</span><span>Contador de parcelas</span></a></li>
+      <li><a class="sidebar-item" href="#"><span>📄</span><span>Validador de documentos</span></a></li>
+    </ul>
+
+    <div class="sidebar-section">Em breve</div>
+    <ul class="sidebar-list">
+      <li><a class="sidebar-item" href="#"><span>⚖️</span><span>Calculadora jurídica</span></a></li>
+      <li><a class="sidebar-item" href="#"><span>💰</span><span>Simulador financeiro</span></a></li>
+      <li><a class="sidebar-item" href="#"><span>🧾</span><span>Gerador de relatórios</span></a></li>
+    </ul>
+  </aside>
+
+  <div class="main-area">
 
   <div class="topbar">
     <div class="topbar-inner">
@@ -634,6 +716,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 
   <script>
