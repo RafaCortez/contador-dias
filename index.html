@@ -259,6 +259,12 @@
       min-width: 220px;
       flex: 1 1 220px;
     }
+    .seg-head{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 8px;
+    }
     .seg:hover{ background: rgba(15,23,42,.02); }
     .seg label{ font-size: 12px; color: var(--muted); }
     .seg input{
@@ -278,11 +284,121 @@
     }
     .seg input::placeholder{ color: #94a3b8; }
 
+    .calendar-trigger{
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display:inline-grid;
+      place-items:center;
+      padding: 0;
+    }
+    .calendar-trigger svg{ width: 14px; height: 14px; }
+    .calendar-trigger:hover{ color: var(--text); border-color:#cbd5e1; }
+
     .seg.bad{
       background: rgba(239,68,68,.06);
       box-shadow: inset 0 0 0 1px rgba(239,68,68,.35);
     }
     .seg.bad label{ color: var(--bad); }
+
+    .abnb-overlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.35);
+      backdrop-filter: blur(2px);
+      display:none;
+      align-items: center;
+      justify-content: center;
+      z-index: 70;
+      padding: 20px;
+    }
+    .abnb-overlay.open{ display:flex; }
+    .abnb-panel{
+      width: min(900px, 96vw);
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 30px 70px rgba(15,23,42,.22);
+      padding: 16px;
+    }
+    .abnb-tabs{
+      display:flex;
+      justify-content:center;
+      margin-bottom: 12px;
+    }
+    .abnb-pill{
+      display:inline-flex;
+      background: #f1f5f9;
+      border-radius: 999px;
+      padding: 4px;
+      gap: 4px;
+    }
+    .abnb-tab{
+      border:none;
+      background: transparent;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font: inherit;
+      color: var(--muted);
+    }
+    .abnb-tab.active{ background:#fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .abnb-months{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .abnb-head{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 650;
+    }
+    .abnb-nav{
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor:pointer;
+    }
+    .abnb-grid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .abnb-dow{ text-align:center; font-size:12px; color: var(--muted); padding: 4px 0; }
+    .abnb-day{
+      height: 34px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text);
+      font: inherit;
+    }
+    .abnb-day:hover{ border-color: var(--line); }
+    .abnb-day.sel{ background: var(--text); color: var(--bg); }
+    .abnb-day.muted{ color: #c3c9d4; cursor: default; }
+    .abnb-quick{
+      margin-top: 14px;
+      display:flex;
+      gap:8px;
+      flex-wrap: wrap;
+    }
+    .abnb-quick button{
+      border:1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font: inherit;
+      cursor: pointer;
+      color: var(--text);
+    }
 
     .divider{
       width:1px;
@@ -402,6 +518,7 @@
       .seg{ min-width: 100%; }
       .searchbar{ border-radius: 20px; }
       .meta{ justify-content:flex-start; }
+      .abnb-months{ grid-template-columns: 1fr; }
     }
 
     .card{
@@ -586,6 +703,12 @@
       border-color: rgba(16,163,127,.45);
       color: var(--text);
     }
+    html.t-dark .abnb-panel,
+    html.t-dark .abnb-nav,
+    html.t-dark .abnb-quick button{ background: #2f2f2f; border-color: var(--line); }
+    html.t-dark .abnb-pill{ background: #202020; }
+    html.t-dark .abnb-tab.active{ background:#3a3a3a; color: var(--text); }
+    html.t-dark .abnb-day.sel{ background: #f3f4f6; color: #111; }
 
     @media print{
       .sidebar{ display:none !important; }
@@ -656,15 +779,25 @@
 
     <div class="searchbar" role="group" aria-label="Barra de datas">
       <div class="seg" id="segStart">
-        <label for="start">Data inicial</label>
-        <input id="start" type="date">
+        <div class="seg-head">
+          <label for="start">Data inicial</label>
+          <button class="calendar-trigger" id="openStartCal" type="button" aria-label="Abrir calendário inicial">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.5V7M16 3.5V7M4 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <input id="start" type="text" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="off">
       </div>
 
       <div class="divider" aria-hidden="true"></div>
 
       <div class="seg" id="segEnd">
-        <label for="end">Data final</label>
-        <input id="end" type="date">
+        <div class="seg-head">
+          <label for="end">Data final</label>
+          <button class="calendar-trigger" id="openEndCal" type="button" aria-label="Abrir calendário final">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.5V7M16 3.5V7M4 9h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <input id="end" type="text" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="off">
       </div>
 
       <div class="cta">
@@ -719,6 +852,36 @@
   </div>
   </div>
 
+  <div class="abnb-overlay" id="abnbOverlay" aria-hidden="true">
+    <div class="abnb-panel" role="dialog" aria-modal="true" aria-label="Selecionar data">
+      <div class="abnb-tabs">
+        <div class="abnb-pill">
+          <button class="abnb-tab active" type="button">Datas</button>
+          <button class="abnb-tab" type="button" disabled>Meses</button>
+          <button class="abnb-tab" type="button" disabled>Flexível</button>
+        </div>
+      </div>
+      <div class="abnb-months">
+        <div>
+          <div class="abnb-head"><button class="abnb-nav" id="abnbPrev" type="button">‹</button><span id="abnbTitleA"></span><span style="width:32px"></span></div>
+          <div class="abnb-grid" id="abnbGridA"></div>
+        </div>
+        <div>
+          <div class="abnb-head"><span style="width:32px"></span><span id="abnbTitleB"></span><button class="abnb-nav" id="abnbNext" type="button">›</button></div>
+          <div class="abnb-grid" id="abnbGridB"></div>
+        </div>
+      </div>
+      <div class="abnb-quick">
+        <button type="button" data-plus="0">Datas exatas</button>
+        <button type="button" data-plus="1">± 1 dia</button>
+        <button type="button" data-plus="2">± 2 dias</button>
+        <button type="button" data-plus="3">± 3 dias</button>
+        <button type="button" data-plus="7">± 7 dias</button>
+        <button type="button" data-plus="14">± 14 dias</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const $ = (id) => document.getElementById(id);
 
@@ -754,6 +917,85 @@
         return `${d}/${m}/${y}`;
       }
       return value;
+    }
+
+    function formatBR(d){
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth()+1).padStart(2, "0");
+      const yy = d.getFullYear();
+      return `${dd}/${mm}/${yy}`;
+    }
+
+    const abnb = {
+      openFor: null,
+      monthBase: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      week: ["D","S","T","Q","Q","S","S"],
+      monthNames: ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"]
+    };
+
+    function openAbnbCalendar(targetId){
+      abnb.openFor = targetId;
+      const parsed = parseDateValue($(targetId).value);
+      const base = parsed || new Date();
+      abnb.monthBase = new Date(base.getFullYear(), base.getMonth(), 1);
+      renderAbnbCalendar();
+      $("abnbOverlay").classList.add("open");
+      $("abnbOverlay").setAttribute("aria-hidden", "false");
+    }
+
+    function closeAbnbCalendar(){
+      $("abnbOverlay").classList.remove("open");
+      $("abnbOverlay").setAttribute("aria-hidden", "true");
+    }
+
+    function renderMonth(gridId, titleId, monthDate){
+      const grid = $(gridId);
+      grid.innerHTML = "";
+      $(titleId).textContent = `${abnb.monthNames[monthDate.getMonth()]} de ${monthDate.getFullYear()}`;
+
+      abnb.week.forEach((w)=>{
+        const el = document.createElement("div");
+        el.className = "abnb-dow";
+        el.textContent = w;
+        grid.appendChild(el);
+      });
+
+      const firstWeekDay = monthDate.getDay();
+      const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth()+1, 0).getDate();
+      const selected = parseDateValue($(abnb.openFor)?.value || "");
+
+      for(let i=0; i<firstWeekDay; i++){
+        const empty = document.createElement("button");
+        empty.className = "abnb-day muted";
+        empty.type = "button";
+        empty.disabled = true;
+        empty.textContent = "";
+        grid.appendChild(empty);
+      }
+
+      for(let day=1; day<=daysInMonth; day++){
+        const dt = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "abnb-day";
+        if(selected && dt.toDateString() === selected.toDateString()) btn.classList.add("sel");
+        btn.textContent = String(day);
+        btn.addEventListener("click", ()=>{
+          const target = $(abnb.openFor);
+          target.value = formatBR(dt);
+          triggerResultCardsFx();
+          calcular();
+          closeAbnbCalendar();
+        });
+        grid.appendChild(btn);
+      }
+    }
+
+    function renderAbnbCalendar(){
+      const a = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth(), 1);
+      const b = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()+1, 1);
+      renderMonth("abnbGridA", "abnbTitleA", a);
+      renderMonth("abnbGridB", "abnbTitleB", b);
     }
 
     // diferença pura em dias, baseada em UTC para evitar DST/horário
@@ -1016,6 +1258,7 @@
     // Eventos inputs
     ["start","end"].forEach(id=>{
       const el = $(id);
+      el.addEventListener("input", ()=> maskBRDate(el));
       el.addEventListener("keydown", (ev)=> {
         if(ev.key === "Enter"){
           triggerResultCardsFx();
@@ -1024,6 +1267,31 @@
       });
       el.addEventListener("change", ()=>{ triggerResultCardsFx(); calcular(); });
       el.addEventListener("blur", ()=>{ if(el.value) { triggerResultCardsFx(); calcular(); } });
+      el.addEventListener("focus", ()=> openAbnbCalendar(id));
+      el.addEventListener("click", ()=> openAbnbCalendar(id));
+    });
+
+    $("openStartCal").addEventListener("click", ()=> openAbnbCalendar("start"));
+    $("openEndCal").addEventListener("click", ()=> openAbnbCalendar("end"));
+    $("abnbPrev").addEventListener("click", ()=>{ abnb.monthBase = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()-1, 1); renderAbnbCalendar(); });
+    $("abnbNext").addEventListener("click", ()=>{ abnb.monthBase = new Date(abnb.monthBase.getFullYear(), abnb.monthBase.getMonth()+1, 1); renderAbnbCalendar(); });
+    $("abnbOverlay").addEventListener("click", (ev)=>{
+      if(ev.target.id === "abnbOverlay") closeAbnbCalendar();
+    });
+    document.addEventListener("keydown", (ev)=>{
+      if(ev.key === "Escape") closeAbnbCalendar();
+    });
+    document.querySelectorAll(".abnb-quick [data-plus]").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        if(!abnb.openFor) return;
+        const plus = Number(btn.dataset.plus || 0);
+        const base = new Date();
+        base.setDate(base.getDate() + plus);
+        $(abnb.openFor).value = formatBR(base);
+        triggerResultCardsFx();
+        calcular();
+        closeAbnbCalendar();
+      });
     });
 
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
