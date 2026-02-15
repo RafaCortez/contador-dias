@@ -444,16 +444,20 @@
       box-shadow: 0 12px 30px rgba(34,197,94,.15);
     }
 
-    .seg.swap-left{ animation: swapLeft .34s ease; }
-    .seg.swap-right{ animation: swapRight .34s ease; }
+    .seg.swap-left{ animation: swapLeft .38s ease; }
+    .seg.swap-right{ animation: swapRight .38s ease; }
+    .seg.swap-active{
+      box-shadow: inset 0 0 0 1px rgba(59,130,246,.35);
+      background: rgba(59,130,246,.06);
+    }
     @keyframes swapLeft{
       0%{ transform: translateX(0); }
-      45%{ transform: translateX(16px); }
+      45%{ transform: translateX(22px); }
       100%{ transform: translateX(0); }
     }
     @keyframes swapRight{
       0%{ transform: translateX(0); }
-      45%{ transform: translateX(-16px); }
+      45%{ transform: translateX(-22px); }
       100%{ transform: translateX(0); }
     }
     .seg.bounce{ animation: swapBounce .22s ease; }
@@ -821,6 +825,8 @@
 
       segA.classList.remove("swap-left","swap-right","bounce");
       segB.classList.remove("swap-left","swap-right","bounce");
+      segA.classList.remove("swap-active");
+      segB.classList.remove("swap-active");
       void segA.offsetWidth;
 
       const rectA = inputA.getBoundingClientRect();
@@ -862,6 +868,8 @@
 
       segA.classList.add("swap-left");
       segB.classList.add("swap-right");
+      segA.classList.add("swap-active");
+      segB.classList.add("swap-active");
 
       requestAnimationFrame(() => {
         floatA.style.transform = `translate(${rectB.left - rectA.left}px, ${rectB.top - rectA.top}px)`;
@@ -886,6 +894,8 @@
 
         segA.classList.remove("swap-left");
         segB.classList.remove("swap-right");
+        segA.classList.remove("swap-active");
+        segB.classList.remove("swap-active");
 
         segB.classList.add("bounce");
         inputB.focus();
