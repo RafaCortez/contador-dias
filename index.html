@@ -318,15 +318,12 @@
     }
     .abnb-overlay.open{ display:flex; }
     .abnb-panel{
-      width: min(620px, 96vw);
-      aspect-ratio: 1 / 1;
+      width: min(560px, 96vw);
       background: #fff;
       border: 1px solid var(--line);
       border-radius: 22px;
       box-shadow: 0 30px 70px rgba(15,23,42,.22);
-      padding: 16px;
-      display:flex;
-      flex-direction: column;
+      padding: 14px 14px 12px;
     }
     .abnb-tabs{
       display:flex;
@@ -362,13 +359,15 @@
       height: 36px;
       border-radius: 999px;
       border: 1px solid var(--line);
-      background: #fff;
+      background: #f8fafc;
       cursor:pointer;
-      font-size: 18px;
       color: var(--text);
       box-shadow: 0 2px 8px rgba(15,23,42,.08);
       transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      display:inline-grid;
+      place-items:center;
     }
+    .abnb-nav svg{ width: 14px; height: 14px; }
     .abnb-nav:hover{ transform: translateY(-1px); box-shadow: 0 6px 14px rgba(15,23,42,.12); background: rgba(15,23,42,.03); }
     .abnb-grid{
       display:grid;
@@ -377,7 +376,9 @@
     }
     .abnb-dow{ text-align:center; font-size:12px; color: var(--muted); padding: 4px 0; }
     .abnb-day{
-      height: 34px;
+      width: 36px;
+      height: 36px;
+      justify-self: center;
       border: 1px solid transparent;
       border-radius: 999px;
       background: transparent;
@@ -386,7 +387,12 @@
       font: inherit;
     }
     .abnb-day:hover{ border-color: var(--line); }
-    .abnb-day.sel{ background: var(--text); color: var(--bg); }
+    .abnb-day.sel{
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(37,99,235,.28);
+    }
     .abnb-day.muted{ color: #c3c9d4; cursor: default; }
 
     .seg.fx-field{
@@ -716,7 +722,7 @@
     html.t-dark .abnb-nav{ background: #2f2f2f; border-color: var(--line); }
     html.t-dark .abnb-pill{ background: #202020; }
     html.t-dark .abnb-tab.active{ background:#3a3a3a; color: var(--text); }
-    html.t-dark .abnb-day.sel{ background: #f3f4f6; color: #111; }
+    html.t-dark .abnb-day.sel{ background: #3b82f6; border-color:#3b82f6; color: #fff; }
 
     @media print{
       .sidebar{ display:none !important; }
@@ -869,7 +875,15 @@
       </div>
       <div class="abnb-months">
         <div>
-          <div class="abnb-head"><button class="abnb-nav" id="abnbPrev" type="button">‹</button><span id="abnbTitleA"></span><button class="abnb-nav" id="abnbNext" type="button">›</button></div>
+          <div class="abnb-head">
+            <button class="abnb-nav" id="abnbPrev" type="button" aria-label="Mês anterior">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <span id="abnbTitleA"></span>
+            <button class="abnb-nav" id="abnbNext" type="button" aria-label="Próximo mês">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
           <div class="abnb-grid" id="abnbGridA"></div>
         </div>
       </div>
