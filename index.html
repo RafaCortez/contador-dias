@@ -354,6 +354,15 @@
     }
     .card:hover{ transform: translateY(-1px); box-shadow: 0 10px 30px rgba(15, 23, 42, .10); }
 
+    .card.result-flash{
+      animation: resultFlash .45s ease;
+    }
+    @keyframes resultFlash{
+      0%{ transform: scale(1); box-shadow: var(--shadow2); }
+      45%{ transform: scale(1.01); box-shadow: 0 16px 36px rgba(59,130,246,.18); }
+      100%{ transform: scale(1); box-shadow: var(--shadow2); }
+    }
+
     .card-total{
       background: linear-gradient(180deg, rgba(59,130,246,.08), rgba(255,255,255,1) 60%);
     }
@@ -599,7 +608,7 @@
     </div>
 
     <div class="grid">
-      <div class="card card-total">
+      <div class="card card-total" id="resultTotalCard">
         <h2>Total</h2>
         <div class="kpi">
           <div class="big" id="total">—</div>
@@ -608,7 +617,7 @@
         </div>
       </div>
 
-      <div class="card card-detail">
+      <div class="card card-detail" id="resultDetailCard">
         <div class="status-line" id="status">—</div>
         <hr class="detail-sep" aria-hidden="true">
         <h2>Detalhamento</h2>
@@ -711,6 +720,16 @@
     function updateModePill(){
       const inc = $("inclusive").checked;
       $("modePill").textContent = inc ? "Modo: Inclusivo" : "Modo: Exclusivo";
+    }
+
+    function triggerResultCardsFx(){
+      ["resultTotalCard", "resultDetailCard"].forEach((id)=>{
+        const card = $(id);
+        if(!card) return;
+        card.classList.remove("result-flash");
+        void card.offsetWidth;
+        card.classList.add("result-flash");
+      });
     }
 
     function calcular(){
@@ -910,7 +929,7 @@
     });
 
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
-    $("calc").addEventListener("click", calcular);
+    $("calc").addEventListener("click", ()=>{ triggerResultCardsFx(); calcular(); });
     $("swapMeta").addEventListener("click", swap);
     $("clearTop").addEventListener("click", clearAll);
     $("pdfTop").addEventListener("click", exportPDF);
