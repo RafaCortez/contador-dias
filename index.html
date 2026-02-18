@@ -1350,6 +1350,7 @@
       el.addEventListener("input", ()=> maskBRDate(el));
       el.addEventListener("keydown", (ev)=> {
         if(ev.key === "Enter"){
+          closeAbnbCalendar();
           triggerFieldFx([id]);
           triggerResultCardsFx();
           calcular();
@@ -1357,8 +1358,6 @@
       });
       el.addEventListener("change", ()=>{ triggerFieldFx([id]); triggerResultCardsFx(); calcular(); });
       el.addEventListener("blur", ()=>{ if(el.value) { triggerFieldFx([id]); triggerResultCardsFx(); calcular(); } });
-      el.addEventListener("focus", ()=> openAbnbCalendar(id));
-      el.addEventListener("click", ()=> openAbnbCalendar(id));
     });
 
     $("openStartCal").addEventListener("click", ()=>{ triggerBtnFx(["openStartCal"]); openAbnbCalendar("start"); });
@@ -1372,14 +1371,15 @@
       if(ev.key === "Escape") closeAbnbCalendar();
     });
     $("inclusive").addEventListener("change", ()=>{ updateModePill(); calcular(); });
-    $("calc").addEventListener("click", ()=>{ triggerBtnFx(["calc"]); triggerResultCardsFx(); calcular(); });
-    $("swapMeta").addEventListener("click", ()=>{ triggerBtnFx(["swapMeta"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); swap(); });
-    $("clearTop").addEventListener("click", ()=>{ triggerBtnFx(["clearTop"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); clearAll(); });
-    $("pdfTop").addEventListener("click", exportPDF);
+    $("calc").addEventListener("click", ()=>{ closeAbnbCalendar(); triggerBtnFx(["calc"]); triggerResultCardsFx(); calcular(); });
+    $("swapMeta").addEventListener("click", ()=>{ closeAbnbCalendar(); triggerBtnFx(["swapMeta"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); swap(); });
+    $("clearTop").addEventListener("click", ()=>{ closeAbnbCalendar(); triggerBtnFx(["clearTop"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); clearAll(); });
+    $("pdfTop").addEventListener("click", ()=>{ closeAbnbCalendar(); exportPDF(); });
 
     const sidebar = document.querySelector(".sidebar");
     const sidebarToggle = $("sidebarToggle");
     sidebarToggle?.addEventListener("click", ()=>{
+      closeAbnbCalendar();
       sidebar.classList.toggle("collapsed");
       const expanded = !sidebar.classList.contains("collapsed");
       sidebarToggle.setAttribute("aria-expanded", expanded ? "true" : "false");
@@ -1443,6 +1443,7 @@
     applyTheme(currentMode, false);
 
     appearanceBtn.addEventListener("click", () => {
+      closeAbnbCalendar();
       setMenuOpen(!appearanceControl.classList.contains("open"));
     });
 
