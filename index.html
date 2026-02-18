@@ -66,13 +66,73 @@
       flex-direction: column;
       padding: 14px 10px;
       overflow-y: auto;
+      transition: width .22s ease, transform .22s ease, padding .22s ease;
+    }
+    .sidebar.collapsed{
+      width: 74px;
+      padding: 14px 8px;
+    }
+    .sidebar.collapsed .sidebar-item span:last-child,
+    .sidebar.collapsed .sidebar-section,
+    .sidebar.collapsed .sidebar-brand-text{ display:none; }
+    .sidebar.collapsed .sidebar-item{ justify-content:center; }
+
+    .sidebar-top{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 4px 6px 10px;
+      border-bottom: 1px solid #2b2b2b;
+      margin-bottom: 10px;
     }
     .sidebar-brand{
       font-weight: 700;
-      padding: 8px 10px 14px;
       color: #f3f4f6;
-      border-bottom: 1px solid #2b2b2b;
-      margin-bottom: 10px;
+      padding: 4px;
+    }
+    .sidebar-toggle{
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid #343434;
+      background: #202020;
+      color: #e5e7eb;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+    }
+    .sidebar-toggle:hover{ background:#292929; }
+    .sidebar-toggle svg{ width:16px; height:16px; }
+    .sidebar.collapsed .sidebar-toggle svg{ transform: rotate(180deg); }
+
+    html.t-light .sidebar{
+      background: #f8fafc;
+      color: #0f172a;
+      border-right: 1px solid #dbe3ef;
+    }
+    html.t-light .sidebar-top{ border-bottom-color:#dbe3ef; }
+    html.t-light .sidebar-brand{ color:#0f172a; }
+    html.t-light .sidebar-section{ color:#64748b; }
+    html.t-light .sidebar-item{ color:#0f172a; }
+    html.t-light .sidebar-item:hover{ background:#eef2f7; }
+    html.t-light .sidebar-item.active{ background:#e2e8f0; color:#0f172a; }
+    html.t-light .sidebar-toggle{
+      border-color:#cbd5e1;
+      background:#ffffff;
+      color:#334155;
+    }
+    html.t-light .sidebar-toggle:hover{ background:#f1f5f9; }
+
+    html.t-dark .sidebar{
+      background: #171717;
+      color: #ececec;
+      border-right: 1px solid #2b2b2b;
+    }
+    html.t-dark .sidebar-top{ border-bottom-color:#2b2b2b; }
+    html.t-dark .sidebar-toggle{
+      border-color:#343434;
+      background:#202020;
+      color:#e5e7eb;
     }
     .sidebar-section{
       color: #a3a3a3;
@@ -108,7 +168,9 @@
     .main-area{
       margin-left: 260px;
       min-height: 100vh;
+      transition: margin-left .22s ease;
     }
+    .sidebar.collapsed ~ .main-area{ margin-left: 74px; }
 
     .topbar{
       position: sticky;
@@ -528,6 +590,8 @@
     }
     @media (max-width: 900px){
       .sidebar{ position: static; width: 100%; height: auto; border-right: none; border-bottom: 1px solid #2b2b2b; }
+      .sidebar.collapsed{ width: 100%; }
+      .sidebar.collapsed ~ .main-area{ margin-left: 0; }
       .main-area{ margin-left: 0; }
       .grid{ grid-template-columns: 1fr; }
       .divider{ display:none; }
@@ -738,21 +802,16 @@
   <div id="themeGlow" aria-hidden="true"></div>
 
   <aside class="sidebar" aria-label="Serviços">
-    <div class="sidebar-brand">Serviços</div>
+    <div class="sidebar-top">
+      <div class="sidebar-brand"><span class="sidebar-brand-text">Serviços</span></div>
+      <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Ocultar barra lateral" aria-expanded="true">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6 9 12l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
 
-    <div class="sidebar-section">Principais</div>
+    <div class="sidebar-section">Serviço</div>
     <ul class="sidebar-list">
       <li><a class="sidebar-item active" href="#"><span>🗓️</span><span>Contador de dias</span></a></li>
-      <li><a class="sidebar-item" href="#"><span>📆</span><span>Calculadora de prazos</span></a></li>
-      <li><a class="sidebar-item" href="#"><span>🧮</span><span>Contador de parcelas</span></a></li>
-      <li><a class="sidebar-item" href="#"><span>📄</span><span>Validador de documentos</span></a></li>
-    </ul>
-
-    <div class="sidebar-section">Em breve</div>
-    <ul class="sidebar-list">
-      <li><a class="sidebar-item" href="#"><span>⚖️</span><span>Calculadora jurídica</span></a></li>
-      <li><a class="sidebar-item" href="#"><span>💰</span><span>Simulador financeiro</span></a></li>
-      <li><a class="sidebar-item" href="#"><span>🧾</span><span>Gerador de relatórios</span></a></li>
     </ul>
   </aside>
 
@@ -1317,6 +1376,15 @@
     $("swapMeta").addEventListener("click", ()=>{ triggerBtnFx(["swapMeta"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); swap(); });
     $("clearTop").addEventListener("click", ()=>{ triggerBtnFx(["clearTop"]); triggerFieldFx(["start","end"]); triggerResultCardsFx(); clearAll(); });
     $("pdfTop").addEventListener("click", exportPDF);
+
+    const sidebar = document.querySelector(".sidebar");
+    const sidebarToggle = $("sidebarToggle");
+    sidebarToggle?.addEventListener("click", ()=>{
+      sidebar.classList.toggle("collapsed");
+      const expanded = !sidebar.classList.contains("collapsed");
+      sidebarToggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+      sidebarToggle.setAttribute("aria-label", expanded ? "Ocultar barra lateral" : "Mostrar barra lateral");
+    });
 
     updateModePill();
 
